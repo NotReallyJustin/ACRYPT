@@ -2,6 +2,7 @@ import processing
 import os
 from datasets.most_common_words import most_common_words
 from datasets.api_keys import api_keys
+from datasets.exclusion import file_to_exclude, folders_to_exclude
 
 def is_substring(str, list):
     '''
@@ -18,36 +19,9 @@ def iter_dir(path: str):
     # Step 1: Tokenize
     tokens = []
 
-    # Automatically generated library files that we shouldn't tamper with
-    file_to_exclude = [
-        ".gitignore",
-        "README.md",
-        "LICENSE",
-        "package.json",
-        "package-lock.json",
-        "Cargo.toml",
-        "Pipfile",
-        "Gemfile",
-        "composer.json",
-        "project.json",
-        "pom.xml",
-        "build.gradle"
-    ]
-
-    # Library folders we should ignore
-    folders_to_exclude = [
-        "__pycache__",
-        "node_modules",
-        "Gemfile.lock",
-        "vendor",
-        "target",
-        "build",
-        ".git"
-    ]
-
     for (root, dirs, file_names) in os.walk(path):
         for file_name in file_names:
-            if ((file_name not in file_to_exclude) and (not is_substring(root, folders_to_exclude))):
+            if ((file_name not in file_to_exclude()) and (not is_substring(root, folders_to_exclude()))):
                 file_path = os.path.join(root, file_name)
                 tokens += processing.generate_token(file_path)
 
