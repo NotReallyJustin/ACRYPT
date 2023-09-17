@@ -1,19 +1,58 @@
 import processing
 import os
-import datasets.most_common_words as most_common_words
-import datasets.api_keys as api_keys
+from datasets.most_common_words import most_common_words
+from datasets.api_keys import api_keys
+
+def is_substring(str, list):
+    '''
+    Given a string and a list, return whether anything in the list is a substring of str
+    '''
+
+    for item in list:
+        if item in str:
+            return True
+    return False
 
 def iter_dir(path: str):
 
     # Step 1: Tokenize
     tokens = []
 
-    for filename in os.listdir(path):
-        f = os.path.join(path, filename)
-        if os.path.isfile(f):
-            tokens += processing.generate_token(f)
+    # Automatically generated library files that we shouldn't tamper with
+    file_to_exclude = [
+        ".gitignore",
+        "README.md",
+        "LICENSE",
+        "package.json",
+        "package-lock.json",
+        "Cargo.toml",
+        "Pipfile",
+        "Gemfile",
+        "composer.json",
+        "project.json",
+        "pom.xml",
+        "build.gradle"
+    ]
 
-    tokens = list(filter(lambda token: processing.filter_length(token) and (not processing.bin_search(token))), tokens)
+    # Library folders we should ignore
+    folders_to_exclude = [
+        "__pycache__",
+        "node_modules",
+        "Gemfile.lock",
+        "vendor",
+        "target",
+        "build",
+        ".git"
+    ]
+
+    for (root, dirs, file_names) in os.walk(path):
+        for file_name in file_names:
+            if ((file_name not in file_to_exclude) and (not is_substring(root, folders_to_exclude))):
+                file_path = os.path.join(root, file_name)
+                print(file_path)
+                tokens += processing.generate_token(file_path)
+
+    tokens = list(filter(lambda token: processing.filter_length(token) and (not processing.bin_search(token)), tokens))
 
     non_api_keys = most_common_words()[:len(api_keys())]
 
@@ -57,4 +96,5 @@ def iter_dir(path: str):
 
 
 if __name__ == '__main__':
-    pass
+    iter_dir("./")
+    #pass

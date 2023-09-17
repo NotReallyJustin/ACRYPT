@@ -4,8 +4,8 @@ Contains all the helper functions that talk about
 
 from nltk.tokenize import sent_tokenize, word_tokenize
 import re
-import datasets.most_common_words as most_common_words
-import datasets.programming_syntax as programming_syntax
+from datasets.most_common_words import most_common_words
+from datasets.programming_syntax import programming_syntax
 
 def generate_token(test_file_path):
 
@@ -14,8 +14,9 @@ def generate_token(test_file_path):
     regexp_quotes = re.compile(r"^['(\[\"]|[\"'\])]$", re.IGNORECASE)
 
     with open(test_file_path, 'r', encoding='utf8') as test_file:
+        file_text = test_file.read()
         # Replaces escape character with space
-        final = test_file.replace("\n", " ")
+        final = file_text.replace("\n", " ")
         for i in sent_tokenize(final):
             temp = []
             
