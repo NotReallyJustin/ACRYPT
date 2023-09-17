@@ -15,9 +15,9 @@ def commit(message, path="./"):
     assert message != None, "You must provide a commit message"
 
     # Thought about making a try catch, but the github error messages are more precise
-    os.system(f"cd {path}")
+    os.chdir(path)
     os.system("git add -A")
-    os.system(f"git commit -a -m {message}")
+    os.system(f'git commit -m "{message}"')
 
 def run_acrypt(message:str, nocommit:bool, path:str):
     '''
@@ -29,28 +29,39 @@ def run_acrypt(message:str, nocommit:bool, path:str):
         path = "./"
 
     key = fernet.generateKey()
+
     found_api_keys = iter_dir(path)
+
     encrypted_api_keys = list(map(lambda api_key: fernet.encryption(api_key, key), found_api_keys))
 
     if (not nocommit):
         iterencrypt.iter_encrypt_fernet(path, found_api_keys, encrypted_api_keys)
-        commit(message)
+        commit(message, path)
 
         decrypted_api_keys = list(map(lambda enc_key: fernet.decryption(enc_key, key), encrypted_api_keys))
         iterencrypt.iter_decrypt_fernet(path, encrypted_api_keys, decrypted_api_keys)
     else:
         # Create a .decrypt file and add it to .gitignore
         gitignore_path = os.path.join(path, ".gitignore")
-        with open(gitignore_path, "a", encoding="utf8") as gitignore:
-            gitignore.write(".decrypt")
+        gitignores = []
+
+        # Check to see if .decrypt it in gitignore already
+        with open(gitignore_path, "r", encoding="utf8") as gitignore:
+            gitignores = gitignore.read().split("\n")
+        
+        if ".decrypt" not in gitignores:
+            with open(gitignore_path, "a", encoding="utf8") as gitignore:
+                gitignore.write(".decrypt\n")
         
         decrypt_path = os.path.join(path, ".decrypt")
-        with open(decrypt_path, "w", encoding="uft8") as decrypt_file:
+        with open(decrypt_path, "w", encoding="utf8") as decrypt_file:
             to_write = key
 
             for i in encrypted_api_keys:
                 to_write += f"\n{i}"
             decrypt_file.write(to_write)
+
+        iterencrypt.iter_encrypt_fernet(path, found_api_keys, encrypted_api_keys)
 
     print("ACRYPT Completed.")
 
@@ -61,7 +72,7 @@ def undo_acrypt(path:str):
     '''
     decrypt_path = os.path.join(path, ".decrypt")
     if os.path.isfile(decrypt_path):
-        with open(decrypt_path, "r", encoding="uft8") as decrypt_file:
+        with open(decrypt_path, "r", encoding="utf8") as decrypt_file:
             try:
                 decrypt_arr = decrypt_file.read().split("\n")
                 key = decrypt_arr[0]
@@ -88,6 +99,6 @@ if __name__ == '__main__':
     print(flags)
 
     if (flags['decrypt']):
-        undo_acrypt(flags.path)
+        undo_acrypt(flags['path'])
     else:
         run_acrypt(flags['message'], flags['nocommit'], flags['path'])

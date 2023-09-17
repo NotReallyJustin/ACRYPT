@@ -10,6 +10,8 @@ from datasets.programming_syntax import programming_syntax
 def generate_token(test_file_path):
 
     tokens = []
+    non_lower_tokens = []
+
     has_chars = re.compile(r"[\w|\d]", re.IGNORECASE)
     regexp_quotes = re.compile(r"^['(\[\"]|[\"'\])]$", re.IGNORECASE)
 
@@ -19,24 +21,28 @@ def generate_token(test_file_path):
         final = file_text.replace("\n", " ")
         for i in sent_tokenize(final):
             temp = []
+            temp2 = []
             
             # tokenize the sentence into words
             for j in word_tokenize(i):
 
                 # PreProcess here
                 if (has_chars.search(j)):
-                    processed = regexp_quotes.sub("", j.lower())
-                    temp.append(processed)
+                    temp2.append(regexp_quotes.sub("", j))
+                    temp.append(regexp_quotes.sub("", j.lower()))
         
             tokens.append(temp)
+            non_lower_tokens.append(temp2)
 
         # Flat the array
         tokens = [item for sublist in tokens for item in sublist]
+        non_lower_tokens = [item for sublist in non_lower_tokens for item in sublist]
 
         # Rid duplicates
         tokens = list(set(tokens))
+        non_lower_tokens = list(set(non_lower_tokens))
 
-    return tokens
+    return (tokens, non_lower_tokens)
 
 def filter_words():
     return list(sorted(programming_syntax() + most_common_words()))
