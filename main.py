@@ -85,8 +85,9 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--path', help="Path to run ACRYPT. If not specified, this defaults to current directory")
 
     flags = vars(parser.parse_args())
+    print(flags)
 
-    if (flags.decrypt):
-        undo_acrypt()
+    if (flags['decrypt']):
+        undo_acrypt(flags.path)
     else:
-        run_acrypt(flags.message, flags.nocommit, flags.path)
+        run_acrypt(flags['message'], flags['nocommit'], flags['path'])

@@ -19,10 +19,12 @@ def iter_encrypt_fernet(path:str, found_api_keys:str, encrypted_api_keys:str):
         for file_name in file_names:
             if ((file_name not in file_to_exclude()) and (not is_substring(root, folders_to_exclude()))):
                 file_path = os.path.join(root, file_name)
-                
-                with open(file_path, 'w+', encoding="utf8") as file:
+                file_code = ""
+
+                with open(file_path, 'r', encoding="utf8") as file:
                     file_code = file.read()
-                    
+
+                with open(file_path, 'w', encoding="utf8") as file:
                     # Doesn't matter which we iterate as found_api_keys[i] --> encrypted_api_keys[i]
                     for i in range(len(encrypted_api_keys)):
                         file_code = file_code.replace(found_api_keys[i], encrypted_api_keys[i])
