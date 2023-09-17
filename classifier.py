@@ -49,7 +49,6 @@ def iter_dir(path: str):
         for file_name in file_names:
             if ((file_name not in file_to_exclude) and (not is_substring(root, folders_to_exclude))):
                 file_path = os.path.join(root, file_name)
-                print(file_path)
                 tokens += processing.generate_token(file_path)
 
     tokens = list(filter(lambda token: processing.filter_length(token) and (not processing.bin_search(token)), tokens))
@@ -62,11 +61,11 @@ def iter_dir(path: str):
     from sklearn.model_selection import train_test_split
 
     # Create labels
-    y_api = [1] * len(api_keys)
+    y_api = [1] * len(api_keys())
     y_non_api = [0] * len(non_api_keys)
 
     # Combine data
-    X = api_keys + non_api_keys
+    X = api_keys() + non_api_keys
     y = y_api + y_non_api
 
     # Convert text data into numerical vectors
@@ -77,7 +76,7 @@ def iter_dir(path: str):
     X_train, X_test, y_train, y_test = train_test_split(X_vectorized, y, test_size=0.2, random_state=42)
 
     # Train a Random Forest Classifier
-    clf = RandomForestClassifier(n_estimators=30)
+    clf = RandomForestClassifier(n_estimators=40)
     clf.fit(X_train, y_train)
 
     # Test the model
@@ -96,5 +95,5 @@ def iter_dir(path: str):
 
 
 if __name__ == '__main__':
-    iter_dir("./")
-    #pass
+    #print(iter_dir("../BasicWeatherApp/"))
+    pass
