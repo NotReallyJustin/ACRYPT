@@ -9,11 +9,13 @@ import os
 import encryption
 import fernet
 from classifier import iter_dir
+import iterencrypt
 
-def commit(message):
+def commit(message, path="./"):
     assert message != None, "You must provide a commit message"
 
     # Thought about making a try catch, but the github error messages are more precise
+    os.system(f"cd {path}")
     os.system("git add -A")
     os.system(f"git commit -a -m {message}")
 
@@ -28,24 +30,52 @@ def run_acrypt(message:str, nocommit:bool, path:str):
 
     key = fernet.generateKey()
     found_api_keys = iter_dir(path)
-    encrypted_api_keys = list(map(lambda api_key: encryption(api_key, key), found_api_keys))
+    encrypted_api_keys = list(map(lambda api_key: fernet.encryption(api_key, key), found_api_keys))
 
     if (not nocommit):
+        iterencrypt.iter_encrypt_fernet(path, found_api_keys, encrypted_api_keys)
         commit(message)
-        encryption.decrypt()
 
-    # Create a .decrypt file and add it to .gitignore
-    with open(".gitignore", "a", encoding="utf8") as gitignore:
-        gitignore.write(".decrypt")
-    
-    with open(".decrypt", "w", encoding="uft8") as decrypt_file:
-        decrypt_file.write()
+        decrypted_api_keys = list(map(lambda enc_key: fernet.decryption(enc_key, key), encrypted_api_keys))
+        iterencrypt.iter_decrypt_fernet(path, encrypted_api_keys, decrypted_api_keys)
+    else:
+        # Create a .decrypt file and add it to .gitignore
+        gitignore_path = os.path.join(path, ".gitignore")
+        with open(gitignore_path, "a", encoding="utf8") as gitignore:
+            gitignore.write(".decrypt")
+        
+        decrypt_path = os.path.join(path, ".decrypt")
+        with open(decrypt_path, "w", encoding="uft8") as decrypt_file:
+            to_write = key
 
-def undo_acrypt():
+            for i in encrypted_api_keys:
+                to_write += f"\n{i}"
+            decrypt_file.write(to_write)
+
+    print("ACRYPT Completed.")
+
+def undo_acrypt(path:str):
     '''
     Decrypts an instance of ACRYPT.
     Requires a .decrypt file that you give to people you want to have access to API key
     '''
+    decrypt_path = os.path.join(path, ".decrypt")
+    if os.path.isfile(decrypt_path):
+        with open(decrypt_path, "r", encoding="uft8") as decrypt_file:
+            try:
+                decrypt_arr = decrypt_file.read().split("\n")
+                key = decrypt_arr[0]
+                encrypted_api_keys = decrypt_arr[1:]
+            except:
+                print("Invalid .decrypt file")
+                return
+            
+            decrypted_api_keys = list(map(lambda enc_key: fernet.decryption(enc_key, key), encrypted_api_keys))
+
+            iterencrypt.iter_decrypt_fernet(path, encrypted_api_keys, decrypted_api_keys)
+        print("ACRYPT Undone.")
+    else:
+        print(".decrypt file not found. Cannot undo encryption. Make sure you're in the proper root directory.")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Initiates ACRYPT to encrypt all API keys and then commit changes.')

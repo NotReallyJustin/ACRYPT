@@ -29,7 +29,7 @@ def iter_encrypt_fernet(path:str, found_api_keys:str, encrypted_api_keys:str):
                     
                     file.write(file_code)
 
-def iter_encrypt_fernet(path:str, encrypted_api_keys:str, decrypted_api_keys:str):
+def iter_decrypt_fernet(path:str, encrypted_api_keys:str, decrypted_api_keys:str):
     '''
     Iterates through the path recursively, and replace found encrypted API keys with decrypted counterparts
     '''

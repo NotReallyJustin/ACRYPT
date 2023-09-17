@@ -15,6 +15,4 @@ def decryption(enc_key: str, key:str):
   return decMessage
 
 if __name__ == '__main__':
-  fernet = generateKey()
-  encrypt = encryption("Hello World!", fernet)
-  decrypt = decryption(encrypt, fernet)
+  pass
