@@ -1,6 +1,7 @@
 '''
 Entry Point of main.py
 Basically the "CLI interface" you see
+@author Amartya Kalra & Justin Chen
 '''
 
 import argparse
